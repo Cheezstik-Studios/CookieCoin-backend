@@ -1,0 +1,74 @@
+Very Specific Homemade Public Licence (VSHPL)
+Version 1.2
+
+Copyright (C) 2026 Khaien Baldwin
+
+1. Permission Grant
+
+Permission is hereby granted, free of charge, to any person or organisation obtaining a copy of this software and associated documentation files (the “Software”), to use, copy, modify, merge, publish, distribute, and sublicense the Software, subject to the conditions below.
+
+2. Conditions of Use and Distribution
+
+2.1 Attribution
+
+All redistributions of the Software or substantial portions thereof must include:
+- the original copyright notice, and
+- attribution to the original author(s), and
+- attribution to the most recent prior contributor where such information is available in the source materials
+
+Attribution must be preserved in documentation, source code, or user-facing credits where applicable.
+
+2.2 License Inclusion
+
+All redistributed copies of the Software, whether modified or unmodified, must include this license text in full.
+
+2.3 Functional Accessibility Requirement
+
+The Software, when distributed or deployed, must not include mechanisms that restrict core functionality based on payment, subscription status, or access tier.
+
+For clarity, the following are prohibited in any distribution of the Software:
+- paywalls or forced subscriptions
+- disabling functionality after a trial period
+- restricting core functionality to paid tiers
+
+
+All functionality included in the Software must be accessible without payment.
+
+This clause does not prohibit:
+- optional paid hosting or infrastructure services external to the Software
+- optional paid support or consulting services
+- voluntary donations or sponsorship
+
+2.4 Optional Payment Solicitation
+
+The Software may display optional and non-blocking messages requesting voluntary payment, donation, or sponsorship.
+
+Such messages must:
+- not prevent or interrupt normal use of the Software
+- not be presented as mandatory
+
+2.5 Modification Disclosure
+
+Distributions of modified versions of the Software must include a clear and reasonable description of modifications made.
+
+This may be provided in:
+- a changelog
+- documentation
+- source code comments
+- release notes
+
+2.6 Sublicensing and Redistribution
+
+Redistribution and sublicensing are permitted, provided all conditions of this license are met.
+
+3. Warranty Disclaimer
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+4. Limitation of Liability
+
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY ARISING FROM THE USE OF OR INABILITY TO USE THE SOFTWARE, INCLUDING BUT NOT LIMITED TO DIRECT, INDIRECT, INCIDENTAL, SPECIAL, OR CONSEQUENTIAL DAMAGES.
+
+5. Termination
+
+Any violation of this license terminates all rights granted under it. Upon termination, all use, distribution, and sublicensing rights cease immediately.
