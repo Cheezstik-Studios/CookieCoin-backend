@@ -57,7 +57,7 @@ def actuallyReplaceChain(newBlockchain):
 
 def sendLatest():
   for ws, address in connected_peers:
-    ws.send(json.dumps(getBlockchain(), cls=jsonencoder))
+    ws.send(json.dumps({'type': 'sendAll', 'body': getBlockchain()}, cls=jsonencoder))
 
 # self-explanatory
 def nextBlock(data, nonce, target):
@@ -131,6 +131,14 @@ def connect(ws):
       data = ws.receive()
       if data is None:
         break
+      else:
+        data = json.loads(data)
+        requestType = data['type']
+        match requestType:
+          case 'queryLatest':
+            ws.send(json.dumps({'type': 'sendLatest', 'body': latestBlock()}))
+          case 'queryAll':
+            ws.send(json.dumps({'type': 'sendAll', 'body': getBlockchain()}))
   finally:
     connected_peers.remove((ws, peer))
 
