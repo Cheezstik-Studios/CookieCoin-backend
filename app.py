@@ -10,10 +10,10 @@ sock = Sock(app)
 
 #defines the Block class
 class Block: 
-  def __init__(self, index, hash, prevHash, timestamp, data, nonce, target): 
+  def __init__(self, index, prevHash, timestamp, data, nonce, target): 
     # a block has an index, the pervious block's hash, a timestamp, transaction data, a nonce (number used once), a target, and a hash calculated from the rest
     self.index = index
-    self.previousHash = prevHash
+    self.prevHash = prevHash
     self.timestamp = timestamp
     self.data = data
     self.nonce = nonce
@@ -53,7 +53,7 @@ def latestBlock():
 def getBlockchain():
   return blockchain
 def actuallyReplaceChain(newBlockchain):
-  blocksblockchain[:] = newBlocks
+  blockchain[:] = newBlockchain
 
 def sendLatest():
   for ws, address in connected_peers:
@@ -65,7 +65,7 @@ def nextBlock(data, nonce, target):
   index = prevBlock.index + 1
   prevHash = prevBlock.hash
   timestamp = int(time.time())
-  return Block(index, hash, prevHash, timestamp, data, nonce, target)
+  return Block(index, prevHash, timestamp, data, nonce, target)
 
 # validator functions
 def isValidStructure(block):
@@ -74,8 +74,8 @@ def isValidStructure(block):
     and type(block.hash) is str 
     and type(block.timestamp) is int 
     and type(block.data) is str
-    and type(block.nonce) is number
-    and type(block.target) is number)
+    and type(block.nonce) is int
+    and type(block.target) is int)
   
 def isValidBlock(block, prevBlock):
   if not isValidStructure(block):
@@ -84,7 +84,9 @@ def isValidBlock(block, prevBlock):
     return False
   elif prevBlock.hash != block.prevHash:
     return False
-  if not hashIsDifficulty(block.hash, block.target):
+  elif block.hash != block.calculateHash():
+    return False
+  elif not hashIsDifficulty(block.hash, block.target):
     return False
   
   return True
