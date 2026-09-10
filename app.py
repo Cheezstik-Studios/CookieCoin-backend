@@ -29,10 +29,16 @@ class Block:
 class jsonencoder(json.JSONEncoder):
   def default(self, obj):
     if isinstance(obj, Block):
-      return {'index': obj.index, 'hash': obj.hash, 'prevHash': obj.prevHash, 'timestamp': obj.timestamp, 'data': obj.data, 'nonce': obj.nonce, 'target': obj.target}
+      return {'__type__': 'Block', 'index': obj.index, 'hash': obj.hash, 'prevHash': obj.prevHash, 'timestamp': obj.timestamp, 'data': obj.data, 'nonce': obj.nonce, 'target': obj.target}
     
     # just in case I later use this on a non-Block
     return super().default(obj)
+
+def jsondecoder(dct):
+    if "__type__" in dct:
+        if dct["__type__"] == "Block":
+            return Block(dct['index']
+    return dct
 
 # returns the genesis block
 def genesis():
@@ -54,6 +60,7 @@ def getBlockchain():
   return blockchain
 def actuallyReplaceChain(newBlockchain):
   blockchain[:] = newBlockchain
+def addBlock(
 
 def sendLatest():
   for ws, address in connected_peers:
@@ -107,7 +114,7 @@ def hashIsDifficulty(hash, target):
   return number <= target
 
 # replaces the chain if it's valid and broadcasts it
-def replaceChain(ws, newBlocks):
+def replaceChain(newBlocks):
   if isValidChain(newBlocks) and len(newBlocks) > len(getBlockchain()):
     actuallyReplaceChain(newBlocks)
     sendLatest()
@@ -136,9 +143,17 @@ def connect(ws):
         requestType = data['type']
         match requestType:
           case 'queryLatest':
-            ws.send(json.dumps({'type': 'sendLatest', 'body': latestBlock()}))
+            ws.send(json.dumps({'type': 'sendLatest', 'body': latestBlock()}, cls=jsonencoder))
           case 'queryAll':
-            ws.send(json.dumps({'type': 'sendAll', 'body': getBlockchain()}))
+            ws.send(json.dumps({'type': 'sendAll', 'body': getBlockchain()}, cls=jsonencoder))
+          case 'sendLatest':
+            if data['body']['index'] > latestBlock().index + 1:
+              ws.send(json.dumps('type': 'queryAll'))
+            elif data['body']['index'] <= latestBlock().index:
+              ws.send(json.dumps({'type': 'sendLatest', 'body': latestBlock()}, cls=jsonencoder))
+            else:
+              
+          
   finally:
     connected_peers.remove((ws, peer))
 
