@@ -3,6 +3,7 @@ import time
 from flask import Flask, request # to send data over a server
 from flask_sock import Sock # a websocket extension for flask
 import json # to jsonify
+import websocket
 
 # sets up flask and websocket
 app = Flask(__name__)
@@ -52,6 +53,7 @@ def genesis():
 # initialise the blockchain and peers list
 blockchain = [genesis()]
 connected_peers = []
+expectedTarget = 0
 
 # random utility functions grouped so they get replaced when I change the blockchain storage method
 def latestBlock():
@@ -62,6 +64,8 @@ def actuallyReplaceChain(newBlockchain):
   blockchain[:] = newBlockchain
 def addBlock(block):
   blockchain.append(block)
+def getBlock(i):
+  return blockchain[i]
 def sendLatest():
   for ws, address in connected_peers:
     ws.send(json.dumps({'type': 'sendAll', 'body': getBlockchain()}, cls=jsonencoder))
@@ -99,7 +103,7 @@ def isValidBlock(block, prevBlock):
   return True
 
 def isValidChain(blockchain):
-  if blockchain[0] != genesis():
+  if blockchain[0].hash != genesis().hash:
     return False
 
   for i in range(len(blockchain)-1):
@@ -107,9 +111,18 @@ def isValidChain(blockchain):
       return False
 
   return True
-
+ 
 # checks if a block has a valid difficulty
 def hashIsDifficulty(hash, target):
+  if target != expectedTarget:
+    latestIndex = latestBlock().index
+    block = getBlock(latestIndex // 144 * 144)
+    otherBlock getBlock((latestIndex // 144 - 1) * 144)
+    oldTarget = otherBlock.target
+    timeTaken = block.timestamp - otherBlock.timestamp
+    expectedTarget = oldTarget * (timeTaken / 86400)
+    if target != expectedTarget:
+      return False
   number = int(hash, 16)
   return number <= target
 
@@ -119,18 +132,22 @@ def replaceChain(newBlocks):
     actuallyReplaceChain(newBlocks)
     sendLatest()
 
-@app.route('/blocks')
-def blocks():
-  return (json.dumps(getBlockchain(), cls=jsonencoder))
+def connect_to_peer(address):
+    if len(connected_peers) < 20 and address not in [item[1] for item in connected_peers]:
+      ws = websocket.create_connection(
+          f"ws://{address}/connect"
+      )
 
-@sock.route('/mineblock')
-def mineblock(ws):
-  newBlock = nextBlock(ws.receive())
-  ws.send(json.dumps(newBlock, cls=jsonencoder))
+      connected_peers.append((ws, address))
 
 @sock.route('/connect')
 def connect(ws):
   peer = f'{request.remote_addr}:{request.environ.get("REMOTE_PORT")}'
+  if len(connected_peers) >= 20:
+    peers = [item[1] for item in connected_peers]
+    ws.send(json.dumps({'type': 'sendPeers', 'body': peers}))
+    ws.send(json.dumps({'type': 'disconnect'}))
+    return
   connected_peers.append((ws, peer))
 
   try:
@@ -139,7 +156,7 @@ def connect(ws):
       if data is None:
         break
       else:
-        data = json.loads(data, object_hook=custom_decoder_hook)
+        data = json.loads(data, object_hook=jsondecoder)
         requestType = data['type']
         match requestType:
           case 'queryLatest':
@@ -148,17 +165,22 @@ def connect(ws):
             ws.send(json.dumps({'type': 'sendAll', 'body': getBlockchain()}, cls=jsonencoder))
           case 'sendLatest':
             if data['body']['index'] > latestBlock().index + 1:
-              ws.send(json.dumps('type': 'queryAll'))
+              ws.send(json.dumps({'type': 'queryAll'}))
             elif data['body']['index'] <= latestBlock().index:
               ws.send(json.dumps({'type': 'sendLatest', 'body': latestBlock()}, cls=jsonencoder))
             else:
-              addBlock(data['body'])
+              if isValidBlock(data['body'], latestBlock()):
+                addBlock(data['body']) 
           case 'sendAll':
             replaceChain(data['body'])
-          
+          case 'queryPeers':
+            peers = [item[1] for item in connected_peers]
+            ws.send(json.dumps({'type': 'sendPeers', 'body': peers}))
+          case 'sendPeers':
+            peers = data['body']
+            for item in peers:
+              connect_to_peer(item)
+          case 'disconnect':
+            break
   finally:
     connected_peers.remove((ws, peer))
-
-@app.route('/peers')
-def peers():
-  return (json.dumps([item[1] for item in connected_peers]))
