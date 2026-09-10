@@ -37,7 +37,7 @@ class jsonencoder(json.JSONEncoder):
 def jsondecoder(dct):
     if "__type__" in dct:
         if dct["__type__"] == "Block":
-            return Block(dct['index']
+            return Block(dct['index'], dct['prevHash'], dct['timestamp'], dct['data'], dct['nonce'], dct['target'])
     return dct
 
 # returns the genesis block
@@ -60,8 +60,8 @@ def getBlockchain():
   return blockchain
 def actuallyReplaceChain(newBlockchain):
   blockchain[:] = newBlockchain
-def addBlock(
-
+def addBlock(block):
+  blockchain.append(block)
 def sendLatest():
   for ws, address in connected_peers:
     ws.send(json.dumps({'type': 'sendAll', 'body': getBlockchain()}, cls=jsonencoder))
@@ -139,7 +139,7 @@ def connect(ws):
       if data is None:
         break
       else:
-        data = json.loads(data)
+        data = json.loads(data, object_hook=custom_decoder_hook)
         requestType = data['type']
         match requestType:
           case 'queryLatest':
@@ -152,7 +152,9 @@ def connect(ws):
             elif data['body']['index'] <= latestBlock().index:
               ws.send(json.dumps({'type': 'sendLatest', 'body': latestBlock()}, cls=jsonencoder))
             else:
-              
+              addBlock(data['body'])
+          case 'sendAll':
+            replaceChain(data['body'])
           
   finally:
     connected_peers.remove((ws, peer))
