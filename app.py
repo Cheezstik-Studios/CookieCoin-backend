@@ -114,15 +114,14 @@ def isValidChain(blockchain):
  
 # checks if a block has a valid difficulty
 def hashIsDifficulty(hash, target):
+  latestIndex = latestBlock().index
+  block = getBlock(latestIndex // 144 * 144)
+  otherBlock getBlock((latestIndex // 144 - 1) * 144)
+  oldTarget = otherBlock.target
+  timeTaken = block.timestamp - otherBlock.timestamp
+  expectedTarget = oldTarget * (timeTaken / 86400)
   if target != expectedTarget:
-    latestIndex = latestBlock().index
-    block = getBlock(latestIndex // 144 * 144)
-    otherBlock getBlock((latestIndex // 144 - 1) * 144)
-    oldTarget = otherBlock.target
-    timeTaken = block.timestamp - otherBlock.timestamp
-    expectedTarget = oldTarget * (timeTaken / 86400)
-    if target != expectedTarget:
-      return False
+    return False
   number = int(hash, 16)
   return number <= target
 
